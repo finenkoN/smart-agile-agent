@@ -25,7 +25,7 @@ func main() {
 	resp, err := client.CreateChatCompletion(
 		context.Background(),
 		openai.ChatCompletionRequest{
-			Model: "gemma2-9b-it",
+			Model: "llama-3.1-8b-instant",
 			Messages: []openai.ChatCompletionMessage{
 				{
 					Role:    openai.ChatMessageRoleUser,
