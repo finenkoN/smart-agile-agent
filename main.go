@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -24,7 +25,7 @@ func main() {
 	resp, err := client.CreateChatCompletion(
 		context.Background(),
 		openai.ChatCompletionRequest{
-			Model: "openai/gpt-oss-120b",
+			Model: "mixtral-8x7b-32768",
 			Messages: []openai.ChatCompletionMessage{
 				{
 					Role:    openai.ChatMessageRoleUser,
@@ -33,5 +34,12 @@ func main() {
 			},
 		},
 	)
+	if err != nil {
+		log.Fatalf("Ошибка при вызове API: %v", err)
+	}
+	if len(resp.Choices) == 0 {
+		log.Fatal("API вернул пустой список ответов")
+	}
+
 	fmt.Println(resp.Choices[0].Message.Content)
 }
