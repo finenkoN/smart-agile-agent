@@ -25,7 +25,7 @@ func main() {
 	resp, err := client.CreateChatCompletion(
 		context.Background(),
 		openai.ChatCompletionRequest{
-			Model: "google/gemma-3-27b-it:free",
+			Model: "google/gemini-1.5-flash:free",
 			Messages: []openai.ChatCompletionMessage{
 				{
 					Role:    openai.ChatMessageRoleUser,
