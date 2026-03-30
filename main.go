@@ -126,7 +126,7 @@ func main() {
 	http.HandleFunc("/chat", HandleChat)
 
 	port := ":8080"
-	fmt.Println("🚀 Сервер запущен на http://localhost" + port)
+	fmt.Println("Сервер запущен на http://localhost" + port)
 	err := http.ListenAndServe(port, nil)
 	if err != nil {
 		log.Fatal("Ошибка запуска сервера:", err)
