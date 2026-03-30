@@ -1,28 +1,36 @@
-# Smart Agile AI-Agent (Go)
+# Smart Agile AI-Agent
 
-Микросервис на Go, который превращает обычные сообщения в Telegram в структурированные задачи в Agile-системе.
+Микросервис на Go для автоматизации управления задачами в Agile-командах через Telegram с использованием LLM Function Calling.
 
 ## Основные возможности
-- **AI-Управление:** Понимает команды вроде "Назначь на Никиту задачу поправить баг" через LLM Function Calling.
-- **Безопасность:** Потокобезопасное хранилище (Mutex) и защита от дублей (Idempotency).
-- **Интеграция:** Работает через n8n (Docker) и Telegram Bot API.
+- **AI-Управление:** Извлечение намерений пользователя и параметров задач (title, assignee) из естественного языка.
+- **Безопасность:** Потокобезопасное хранилище (sync.Mutex) и механизм идемпотентности (UpdateID).
+- **Инфраструктура:** Полная контейнеризация компонентов и оркестрация через Docker Compose.
 
 ## Стек технологий
-- **Backend:** Go 1.22+ (net/http, encoding/json, sync)
-- **AI:** OpenRouter / OpenAI API (Model: Gemini-2.0 / GPT-4o-mini)
-- **Workflow:** n8n (Self-hosted in Docker)
-- **Database:** In-memory Map (Thread-safe)
+- **Backend:** Go 1.22+ (net/http, encoding/json, sync).
+- **AI:** OpenRouter API.
+- **Workflow:** n8n (Self-hosted в Docker).
+- **Хранилище:** In-memory Map.
 
 ## Архитектура
-1. **User** -> Telegram Bot
-2. **n8n (Docker)** -> Опрашивает Telegram (Polling)
-3. **Go Server** -> Принимает POST-запрос, валидирует UpdateID.
-4. **AI API** -> Парсит текст в JSON-аргументы.
-5. **Go Logic** -> Создает задачу в памяти и возвращает ответ.
+1. **User** -> Telegram Bot API.
+2. **n8n (Docker)** -> Опрос Telegram (Polling) и проксирование данных.
+3. **Go Server** -> Валидация запроса, проверка идемпотентности и вызов AI.
+4. **AI API** -> Парсинг текста в структурированный JSON.
+5. **Go Logic** -> Выполнение бизнес-функций и сохранение данных.
 
-## Запуск
+## Инструкция по запуску
 1. Склонируйте репозиторий.
-2. Создайте `.env` файл с `API_KEY` и `BASE_URL`.
-3. Запустите Go сервер: `go run main.go`.
-4. Разверните n8n в Docker и импортируйте workflow.
+2. Создайте файл `.env`, указав `API_KEY` и `TG_TOKEN`.
+3. Запустите всю инфраструктуру одной командой:
+```bash
+docker-compose up -d --build
+```
+4. Откройте `localhost:5678` и импортируйте сценарий `agile_workflow.json`.
 
+## Структура проекта
+* **/tasks** — логика хранилища и управления данными.
+* **main.go** — точка входа, HTTP-обработчики и интеграция с AI.
+* **Dockerfile** — многоэтапная сборка образа приложения.
+* **docker-compose.yml** — описание сетевого взаимодействия сервисов.
