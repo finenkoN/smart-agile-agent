@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+
+  # 1. бэкенд на Go
+  go-backend:
+    build: .
+    container_name: go_agent
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    restart: unless-stopped
+
+  # 2. Платформа n8n
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:latest
+    container_name: n8n_system
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_ENFORCEMENT_AGREEMENT=true
+    volumes:
+      - ./n8n_data:/home/node/.n8n
+    depends_on:
+      - go-backend

@@ -1,0 +1,122 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "seconds",
+              "seconds": 2
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger-id",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [400, 300]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.telegram.org/bot<ТВОЙ_ТОКЕН_ТУТ>/getUpdates?offset=-1&limit=1",
+        "options": {}
+      },
+      "id": "get-updates-id",
+      "name": "HTTP Request (Telegram)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [600, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://go-backend:8080/chat",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"message\": \"{{ $node[\"HTTP Request (Telegram)\"].json.result[0].message.text }}\",\n  \"update_id\": {{ $node[\"HTTP Request (Telegram)\"].json.result[0].update_id }}\n}",
+        "options": {}
+      },
+      "id": "go-server-id",
+      "name": "HTTP Request (Go Backend)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.reply }}",
+              "value2": "SKIP"
+            }
+          ]
+        }
+      },
+      "id": "filter-skip-id",
+      "name": "If Not SKIP",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [1100, 300]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $node[\"HTTP Request (Telegram)\"].json.result[0].message.chat.id }}",
+        "text": "={{ $node[\"HTTP Request (Go Backend)\"].json.reply }}",
+        "additionalFields": {}
+      },
+      "id": "telegram-send-id",
+      "name": "Telegram (Send Message)",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.1,
+      "position": [1350, 200]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request (Telegram)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request (Telegram)": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request (Go Backend)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request (Go Backend)": {
+      "main": [
+        [
+          {
+            "node": "If Not SKIP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Not SKIP": {
+      "main": [
+        [
+          {
+            "node": "Telegram (Send Message)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}
